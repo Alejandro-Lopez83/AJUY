@@ -28,11 +28,5 @@ app.add_middleware(
 
 @app.get("/")
 def read_root():
-    """
-   Endpoint raíz que confirma la configuración de CORS.
-
-   Retorna:
-   - dict: Mensaje de confirmación de configuración CORS
-   """
     return {"message": "CORS configurado correctamente"}
 

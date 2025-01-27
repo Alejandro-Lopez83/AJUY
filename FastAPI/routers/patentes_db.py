@@ -19,30 +19,12 @@ async def patentes(id: str) -> Patente:
 # Cuenta todas las patentes
 @router.get("/count", response_model=int)
 async def count_patentes():
-    """
-   Cuenta el número total de patentes en la base de datos.
-
-   Parámetros:
-   - Ninguno
-
-   Retorna:
-   - int: Número total de patentes
-   """
-    count = db_client.patentes.count_documents({})
+    count = db_client.Proyecto.patentes.count_documents({})
     return count
 
 
 @router.get("/{id}", response_model=Patente) 
 async def patentes(id: str) -> Patente:
-    """
-   Busca una patente específica por su ID, incluyendo detalles de los autores.
-
-   Parámetros:
-   - id (str): Identificador único de la patente
-
-   Retorna:
-   - Patente: Detalles de la patente con información de los autores
-   """
     pipeline = [
         {"$match": {"_id": ObjectId(id)}},
         {"$lookup": {
@@ -52,22 +34,13 @@ async def patentes(id: str) -> Patente:
             "as": "Autores"
         }}
     ]
-    patente = db_client.patentes.aggregate(pipeline).next()
+    patente = db_client.Proyecto.patentes.aggregate(pipeline).next()
     return patente_schema(patente)
 
 
 #Encuentra Patente por id autor
 @router.get("/autor/{id}", response_model= Page[Patente])
 async def patentes(id: str) -> Page[Patente]:
-    """
-   Recupera una lista paginada de patentes de un autor específico.
-
-   Parámetros:
-   - id (str): Identificador único del autor
-
-   Retorna:
-   - Page[Patente]: Página de patentes del autor, ordenadas por título
-   """
     pipeline = [
             {"$match": {"Autores": ObjectId(id)}},
             {"$lookup": {
@@ -78,5 +51,5 @@ async def patentes(id: str) -> Page[Patente]:
             }},
             {"$sort": {"Título": 1, "_id": 1}}
         ]
-    patentes = list(db_client.patentes.aggregate(pipeline))
+    patentes = list(db_client.Proyecto.patentes.aggregate(pipeline))
     return paginate(patentes_schema(patentes))
